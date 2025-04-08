@@ -17,12 +17,10 @@ class TestInMemoryCounter:
     async def test_increment_updates_value_correctly(self):
         counter = InMemoryCounter()
 
-        # Первый инкремент
         result = await counter.increment("test", 5)
         assert result == 5
         assert counter._InMemoryCounter__storage["test"] == 5
 
-        # Повторный инкремент
         result = await counter.increment("test", 3)
         assert result == 8
         assert counter._InMemoryCounter__storage["test"] == 8
@@ -30,15 +28,12 @@ class TestInMemoryCounter:
     async def test_decrement_updates_value_correctly(self):
         counter = InMemoryCounter()
 
-        # Устанавливаем начальное значение
         await counter.increment("test", 10)
 
-        # Декремент
         result = await counter.decrement("test", 3)
         assert result == 7
         assert counter._InMemoryCounter__storage["test"] == 7
 
-        # Попытка уйти ниже нуля
         result = await counter.decrement("test", 10)
         assert result == 0
         assert counter._InMemoryCounter__storage["test"] == 0
@@ -46,7 +41,6 @@ class TestInMemoryCounter:
     async def test_reset_sets_value_to_zero(self):
         counter = InMemoryCounter()
 
-        # Устанавливаем значение
         await counter.increment("test", 7)
         await counter.reset("test")
 
