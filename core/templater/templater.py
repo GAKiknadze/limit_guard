@@ -3,16 +3,26 @@ from dataclasses import dataclass
 
 from ..utils import gen_time_hash
 
+from enum import Enum
 
-@dataclass
+class PeriodType(str, Enum):
+    DAY = "day"
+    MONTH = "month"
+    YEAR = "year"
+
+@dataclass(slots=True)
 class Template:
     id: str
-    max_value: int
+    max_value: int | None = None
+    period_count: int | None = None
+    period_type: PeriodType | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class TemplateUpdate:
     max_value: int | None = None
+    period_count: int | None = None
+    period_type: PeriodType | None = None
 
 
 class Templater(ABC):
