@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 
 from ..utils import gen_time_hash
 
-from enum import Enum
 
 class PeriodType(str, Enum):
     DAY = "day"
     MONTH = "month"
     YEAR = "year"
+
 
 @dataclass(slots=True)
 class Template:
