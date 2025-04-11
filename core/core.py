@@ -1,9 +1,15 @@
+from enum import Enum
 from typing import Tuple
 
 from .counter import Counter, InMemoryCounter
 from .exceptions import BadSpecification, ObjectNotFound
 from .limiter import InMemoryLimiter, Limit, Limiter, LimitUpdate
 from .templater import InMemoryTemplater, Template, Templater, TemplateUpdate
+
+
+class OperationType(int, Enum):
+    INCR = 1
+    DECR = 2
 
 
 class Core:
@@ -137,11 +143,29 @@ class Core:
             await self.__cache_limiter.delete(limit_id)  # type: ignore[union-attr]
             await self.__cache_counter.reset(limit_id)  # type: ignore[union-attr]
 
-    async def limit_usage(self):
-        pass
+    async def limit_usage(self, limit_id: str) -> int:
+        if self.__cache_used:
+            return await self.__cache_counter.get(limit_id)  # type: ignore[union-attr]
+        return await self.__counter.get(limit_id)
 
-    async def limit_consume(self):
-        pass
+    async def limit_consume(
+        self, limit_id: str, action: OperationType = OperationType.INCR, value: int = 1
+    ) -> int:
+        result: int = 0
 
-    async def limit_reset(self):
-        pass
+        if action == OperationType.INCR:
+            result = await self.__counter.increment(limit_id, value)
+            if self.__cache_used:
+                await self.__cache_counter.increment(limit_id, value)  # type: ignore[union-attr]
+        elif action == OperationType.DECR:
+            result = await self.__counter.decrement(limit_id, value)
+            if self.__cache_used:
+                await self.__cache_counter.decrement(limit_id, value)  # type: ignore[union-attr]
+
+        return result
+
+    async def limit_reset(self, limit_id: str) -> None:
+        await self.__counter.reset(limit_id)
+
+        if self.__cache_used:
+            await self.__cache_counter.reset(limit_id)  # type: ignore[union-attr]
