@@ -1,9 +1,8 @@
-from enum import Enum
 from typing import Tuple
 
 from .counter import Counter, InMemoryCounter
 from .exceptions import BadSpecification, ObjectNotFound
-from .limiter import InMemoryLimiter, Limiter
+from .limiter import InMemoryLimiter, Limit, Limiter, LimitUpdate
 from .templater import InMemoryTemplater, Template, Templater, TemplateUpdate
 
 
@@ -106,11 +105,23 @@ class Core:
         if self.__cache_used:
             await self.__cache_templater.delete(template_id)  # type: ignore[union-attr]
 
-    async def limit_create(self):
-        pass
+    async def limit_create(self, limit: Limit) -> Limit:
+        saved_limit = await self.__limiter.create(limit)
 
-    async def limit_update(self):
-        pass
+        if self.__cache_used:
+            await self.__cache_limiter.create(saved_limit)  # type: ignore[union-attr]
+
+        return saved_limit
+
+    async def limit_update(self, limit_id: str, limit: LimitUpdate) -> Limit:
+        saved_limit = await self.__limiter.update(limit_id, limit)
+        if saved_limit is None:
+            raise ObjectNotFound(f"Limit with id `{limit_id}` not found")
+
+        if self.__cache_used:
+            await self.__cache_limiter.update(limit_id, limit)  # type: ignore[union-attr]
+
+        return saved_limit
 
     async def limit_get_by_id(self):
         pass
@@ -118,8 +129,13 @@ class Core:
     async def limit_get_list(self):
         pass
 
-    async def limit_delete(self):
-        pass
+    async def limit_delete(self, limit_id: str) -> None:
+        await self.__limiter.delete(limit_id)
+        await self.__counter.reset(limit_id)
+
+        if self.__cache_used:
+            await self.__cache_limiter.delete(limit_id)  # type: ignore[union-attr]
+            await self.__cache_counter.reset(limit_id)  # type: ignore[union-attr]
 
     async def limit_usage(self):
         pass
