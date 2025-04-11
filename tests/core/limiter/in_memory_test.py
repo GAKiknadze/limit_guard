@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from core.limiter.in_memory import InMemoryLimiter, Limit, LimitUpdate
+from core.limiter import InMemoryLimiter, Limit, LimitUpdate
 
 
 @pytest.mark.asyncio

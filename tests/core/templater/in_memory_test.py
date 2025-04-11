@@ -1,6 +1,6 @@
 import pytest
 
-from core.templater.in_memory import InMemoryTemplater, Template, TemplateUpdate
+from core.templater import InMemoryTemplater, Template, TemplateUpdate
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,6 @@
 import pytest
 
-from core.counter.in_memory import InMemoryCounter
+from core.counter import InMemoryCounter
 
 
 @pytest.mark.asyncio
