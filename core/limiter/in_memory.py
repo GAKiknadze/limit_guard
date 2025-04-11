@@ -7,10 +7,13 @@ from .limiter import Limit, Limiter, LimitUpdate
 
 class InMemoryLimiter(Limiter):
     __storage: Dict[str, Limit]
+    __is_cache: bool = False
 
-    def __init__(self):
+    def __init__(self, is_cache: bool | None = None):
         super().__init__()
         self.__storage = dict()
+        if is_cache:
+            self.__is_cache = is_cache
 
     async def get(
         self,
@@ -48,8 +51,12 @@ class InMemoryLimiter(Limiter):
         return result
 
     async def create(self, limit: Limit) -> Limit:
+        new_id = limit.id
+        if not self.__is_cache:
+            new_id = self.change_id(limit.id)
+
         new_limit = Limit(
-            id=self.change_id(limit.id),
+            id=new_id,
             entity_id=limit.entity_id,
             template_id=limit.template_id,
             is_allowed=limit.is_allowed,
