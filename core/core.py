@@ -70,7 +70,7 @@ class Core:
         saved_template = await self.__templater.create(template)
 
         if self.__cache_used:
-            await self.__cache_templater.create(saved_template)  # type: ignore
+            await self.__cache_templater.create(saved_template)  # type: ignore[union-attr]
 
         return saved_template
 
@@ -82,13 +82,13 @@ class Core:
             raise ObjectNotFound(f"Template with id `{template_id}` not found")
 
         if self.__cache_used:
-            await self.__cache_templater.update(template_id, saved_template)  # type: ignore
+            await self.__cache_templater.update(template_id, template)  # type: ignore[union-attr]
 
         return saved_template
 
     async def template_get_by_id(self, template_id: str) -> Template:
         if self.__cache_used:
-            cached_template = await self.__cache_templater.get(template_id)  # type: ignore
+            cached_template = await self.__cache_templater.get(template_id)  # type: ignore[union-attr]
             if cached_template is not None:
                 return cached_template
 
@@ -104,7 +104,7 @@ class Core:
     async def template_delete(self, template_id: str) -> None:
         await self.__templater.delete(template_id)
         if self.__cache_used:
-            await self.__cache_templater.delete(template_id)  # type: ignore
+            await self.__cache_templater.delete(template_id)  # type: ignore[union-attr]
 
     async def limit_create(self):
         pass
